@@ -1,0 +1,25 @@
+name: oct_staubli_grasping
+task_name: oct_staubli_grasping
+
+shape_meta: &shape_meta
+  obs:
+    point_cloud:
+      shape: [2048, 3]
+      type: point_cloud
+    agent_pos:
+      shape: [10]
+      type: low_dim
+  action:
+    shape: [10]
+
+env_runner: null
+
+dataset:
+  _target_: diffusion_policy_3d.dataset.oct_dataset.OCTDataset
+  zarr_path: data/oct_staubli_dp3.zarr
+  horizon: ${horizon}
+  pad_before: ${eval:'${n_obs_steps}-1'}
+  pad_after: ${eval:'${n_action_steps}-1'}
+  seed: 42
+  val_ratio: 0.02
+  max_train_episodes: null
