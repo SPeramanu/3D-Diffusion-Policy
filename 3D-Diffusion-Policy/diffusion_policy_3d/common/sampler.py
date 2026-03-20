@@ -1,10 +1,24 @@
 from typing import Optional
 import numpy as np
-import numba
+
+try:
+    import numba
+except Exception:
+    numba = None
 from diffusion_policy_3d.common.replay_buffer import ReplayBuffer
 
 
-@numba.jit(nopython=True)
+def _jit(*args, **kwargs):
+    """Use numba.jit when available; otherwise, return a no-op decorator."""
+    if numba is None:
+        def _decorator(fn):
+            return fn
+
+        return _decorator
+    return numba.jit(*args, **kwargs)
+
+
+@_jit(nopython=True)
 def create_indices(
     episode_ends:np.ndarray, sequence_length:int, 
     episode_mask: np.ndarray,

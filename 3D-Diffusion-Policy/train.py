@@ -147,16 +147,26 @@ class TrainDP3Workspace:
         cprint(f"[WandB] name: {cfg.logging.name}", "yellow")
         cprint("-----------------------------", "yellow")
         # configure logging
-        wandb_run = wandb.init(
-            dir=str(self.output_dir),
-            config=OmegaConf.to_container(cfg, resolve=True),
-            **cfg.logging
-        )
-        wandb.config.update(
-            {
-                "output_dir": self.output_dir,
-            }
-        )
+        class _NoOpWandbRun:
+            def log(self, *args, **kwargs):
+                return None
+
+        logging_mode = str(getattr(cfg.logging, 'mode', 'online')).lower()
+        wandb_disabled_env = os.environ.get('WANDB_DISABLED', '').lower() in ('1', 'true', 'yes')
+        if logging_mode == 'disabled' or wandb_disabled_env:
+            cprint(f"[WandB] disabled mode: skipping wandb.init (mode={logging_mode}, WANDB_DISABLED={wandb_disabled_env})", "yellow")
+            wandb_run = _NoOpWandbRun()
+        else:
+            wandb_run = wandb.init(
+                dir=str(self.output_dir),
+                config=OmegaConf.to_container(cfg, resolve=True),
+                **cfg.logging
+            )
+            wandb.config.update(
+                {
+                    "output_dir": self.output_dir,
+                }
+            )
 
         # configure checkpoint
         topk_manager = TopKCheckpointManager(

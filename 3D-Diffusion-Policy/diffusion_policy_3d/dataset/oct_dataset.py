@@ -9,7 +9,7 @@ first 3 columns (XYZ) are forwarded to DP3Encoder unless the policy is
 configured with ``use_pc_color=True``.
 """
 
-from typing import Dict
+from typing import Dict, Optional
 import torch
 import numpy as np
 import copy
@@ -35,8 +35,8 @@ class OCTDataset(BaseDataset):
         pad_after: int = 0,
         seed: int = 42,
         val_ratio: float = 0.0,
-        max_train_episodes: int | None = None,
-        task_name: str | None = None,
+        max_train_episodes: Optional[int] = None,
+        task_name: Optional[str] = None,
     ):
         super().__init__()
         self.task_name = task_name
