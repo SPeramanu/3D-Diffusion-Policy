@@ -130,8 +130,7 @@ class PointNetEncoderXYZ(nn.Module):
         block_channel = [64, 128, 256]
         cprint("[PointNetEncoderXYZ] use_layernorm: {}".format(use_layernorm), 'cyan')
         cprint("[PointNetEncoderXYZ] use_final_norm: {}".format(final_norm), 'cyan')
-        
-        assert in_channels == 3, cprint(f"PointNetEncoderXYZ only supports 3 channels, but got {in_channels}", "red")
+        cprint(f"[PointNetEncoderXYZ] in_channels: {in_channels}", 'cyan')
        
         self.mlp = nn.Sequential(
             nn.Linear(in_channels, block_channel[0]),
@@ -236,11 +235,14 @@ class DP3Encoder(nn.Module):
         self.use_pc_color = use_pc_color
         self.pointnet_type = pointnet_type
         if pointnet_type == "pointnet":
-            if use_pc_color:
+            # Derive in_channels from point_cloud_shape (N, C) → C
+            pc_in_channels = self.point_cloud_shape[-1]
+            if use_pc_color and pc_in_channels < 6:
+                # Legacy RGB mode: force 6 channels
                 pointcloud_encoder_cfg.in_channels = 6
                 self.extractor = PointNetEncoderXYZRGB(**pointcloud_encoder_cfg)
             else:
-                pointcloud_encoder_cfg.in_channels = 3
+                pointcloud_encoder_cfg.in_channels = pc_in_channels
                 self.extractor = PointNetEncoderXYZ(**pointcloud_encoder_cfg)
         else:
             raise NotImplementedError(f"pointnet_type: {pointnet_type}")

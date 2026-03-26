@@ -1,10 +1,14 @@
-name: oct_staubli_grasping
-task_name: oct_staubli_grasping
+# Task config for OCT Staubli grasping with intensity channel (XYZI).
+# Use this config when the dataset was converted with --include_intensity.
+# Requires use_pc_color: true in the policy config to keep the 4th channel.
+
+name: oct_staubli_grasping_intensity
+task_name: oct_staubli_grasping_intensity
 
 shape_meta: &shape_meta
   obs:
     point_cloud:
-      shape: [2048, 3]
+      shape: [2048, 4]
       type: point_cloud
     agent_pos:
       shape: [1]
