@@ -4,9 +4,8 @@ OCT Staubli dataset for DP3.
 Loads zarr replay-buffer with keys: state, action, point_cloud.
 The dummy ``img`` key produced by the converter is ignored.
 
-When ``point_cloud`` columns > 3 (e.g. XYZI with intensity), only the
-first 3 columns (XYZ) are forwarded to DP3Encoder unless the policy is
-configured with ``use_pc_color=True``.
+When ``point_cloud`` columns > 3 (e.g. XYZI with intensity), the model
+uses as many channels as requested by ``task.shape_meta.obs.point_cloud``.
 """
 
 from typing import Dict, Optional
