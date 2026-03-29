@@ -74,6 +74,7 @@ class PointNetEncoderXYZRGB(nn.Module):
         block_channel = [64, 128, 256, 512]
         cprint("pointnet use_layernorm: {}".format(use_layernorm), 'cyan')
         cprint("pointnet use_final_norm: {}".format(final_norm), 'cyan')
+        cprint(f"pointnet rgb/intensity in_channels: {in_channels}", 'cyan')
         
         self.mlp = nn.Sequential(
             nn.Linear(in_channels, block_channel[0]),
@@ -237,9 +238,10 @@ class DP3Encoder(nn.Module):
         if pointnet_type == "pointnet":
             # Derive in_channels from point_cloud_shape (N, C) → C
             pc_in_channels = self.point_cloud_shape[-1]
-            if use_pc_color and pc_in_channels < 6:
-                # Legacy RGB mode: force 6 channels
-                pointcloud_encoder_cfg.in_channels = 6
+            if use_pc_color and pc_in_channels > 3:
+                # Use the richer pointnet branch for any feature-augmented cloud
+                # (e.g. XYZI with 4 channels, XYZRGB with 6 channels).
+                pointcloud_encoder_cfg.in_channels = pc_in_channels
                 self.extractor = PointNetEncoderXYZRGB(**pointcloud_encoder_cfg)
             else:
                 pointcloud_encoder_cfg.in_channels = pc_in_channels
