@@ -27,3 +27,11 @@ dataset:
   seed: 42
   val_ratio: 0.02
   max_train_episodes: null
+  # ── Stochastic point-cloud augmentation (per-getitem) ──
+  augment_pointcloud: false
+  sigma_xyz: 0.0
+  sigma_intensity: 0.0
+  xyz_jitter_rate: 1.0
+  intensity_jitter_rate: 1.0
+  mask_padding: true
+  augment_val: false
