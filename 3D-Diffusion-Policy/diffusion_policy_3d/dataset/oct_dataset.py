@@ -22,7 +22,10 @@ from diffusion_policy_3d.common.pytorch_util import dict_apply
 from diffusion_policy_3d.common.replay_buffer import ReplayBuffer
 from diffusion_policy_3d.common.sampler import (
     SequenceSampler, get_val_mask, downsample_mask)
-from diffusion_policy_3d.model.common.normalizer import LinearNormalizer
+from diffusion_policy_3d.model.common.normalizer import (
+    LinearNormalizer,
+    SingleFieldLinearNormalizer,
+)
 from diffusion_policy_3d.dataset.base_dataset import BaseDataset
 
 
@@ -243,13 +246,18 @@ class OCTDataset(BaseDataset):
         return val_set
 
     def get_normalizer(self, mode='limits', **kwargs):
+        # point_cloud is intentionally excluded: the converter already
+        # applies fixed-workspace isotropic normalization (see
+        # data_conversion_oct_staubli_dp3.load_oct_scans). Fitting a
+        # per-channel LinearNormalizer here would stretch each axis back
+        # to [-1, 1] independently, destroying the aspect ratio.
         data = {
             'action': self.replay_buffer['action'],
             'agent_pos': self.replay_buffer['state'][...,:],
-            'point_cloud': self.replay_buffer['point_cloud'],
         }
         normalizer = LinearNormalizer()
         normalizer.fit(data=data, last_n_dims=1, mode=mode, **kwargs)
+        normalizer['point_cloud'] = SingleFieldLinearNormalizer.create_identity()
         return normalizer
 
     def __len__(self) -> int:
